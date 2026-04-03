@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Bell,
   BarChart3,
   Users,
   Shield,
@@ -41,10 +40,12 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import NotificationCenter from '@/components/NotificationCenter';
 import { useAuth, AppRole } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -108,6 +109,15 @@ type ActivityItem = {
   id: string;
   type: 'signup' | 'role-change' | 'submission' | 'delete';
   message: string;
+  created_at: string;
+};
+
+type AdminNotification = {
+  id: string;
+  title: string;
+  body: string;
+  type: string;
+  is_read: boolean;
   created_at: string;
 };
 
@@ -207,6 +217,7 @@ function downloadCsv(rows: StoredUser[]) {
 export default function AdminDashboardPage() {
   const { role, user, profile, signOut, updateUserRole } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const [activeNav, setActiveNav] = useState<(typeof SIDEBAR_ITEMS)[number]['key']>('dashboard');
   const [globalSearch, setGlobalSearch] = useState('');
@@ -217,6 +228,7 @@ export default function AdminDashboardPage() {
   const [deletingUserFor, setDeletingUserFor] = useState<string | null>(null);
   const [theme, setTheme] = useState<ThemeMode>('eco');
   const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const [users, setUsers] = useState<StoredUser[]>([]);
   const [missions, setMissions] = useState<MissionItem[]>([]);
@@ -226,6 +238,19 @@ export default function AdminDashboardPage() {
     () => questSubmissions.map((q) => ({ id: q.id, status: q.status, submitted_at: q.submitted_at })),
     [questSubmissions]
   );
+
+  const notificationsQuery = useQuery({
+    queryKey: ['admin-notifications', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [] as AdminNotification[];
+      const items = await supabaseQueries.notifications.getUserNotifications(user.id);
+      return items.slice(0, 20) as AdminNotification[];
+    },
+    enabled: !!user?.id,
+  });
+
+  const notifications = notificationsQuery.data ?? [];
+  const unreadNotifications = notifications.filter((n) => !n.is_read).length;
 
   const loadUsers = useCallback(async () => {
     const rows = await supabaseQueries.profiles.getAll();
@@ -274,12 +299,19 @@ export default function AdminDashboardPage() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'mission_submissions' }, () => {
         void loadMissionsAndSubmissions();
       })
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['admin-notifications', user.id] });
+        }
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, loadUsers, loadMissionsAndSubmissions]);
+  }, [user?.id, loadUsers, loadMissionsAndSubmissions, queryClient]);
 
   useEffect(() => {
     if (activeNav === 'missions') {
@@ -596,14 +628,15 @@ export default function AdminDashboardPage() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button variant="outline" size="icon" className={`relative rounded-xl transition-all duration-200 ${themeStyles.btnHover}`}>
-              <Bell className="h-4 w-4" />
-              {recentActivity.length > 0 && (
-                <span className="absolute -right-1 -top-1 h-4 min-w-4 rounded-full bg-coral px-1 text-[10px] leading-4 text-white">
-                  {Math.min(9, recentActivity.length)}
-                </span>
-              )}
-            </Button>
+            <div className="relative">
+              <NotificationCenter
+                notifications={notifications}
+                isOpen={notificationsOpen}
+                onOpenChange={setNotificationsOpen}
+                unreadCount={unreadNotifications}
+                userId={user?.id}
+              />
+            </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
