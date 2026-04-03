@@ -53,7 +53,7 @@ describe('route guards', () => {
 
   it('RoleDashboardRoute redirects student role mismatch to resolved dashboard', () => {
     mockedUseAuth.mockReturnValue(makeAuthValue({
-      user: { id: 'u1' },
+      user: { id: 'u1', email: 'u1@example.com' },
       role: 'student',
       loading: false,
       resolveDashboardPath: () => '/student-dashboard',
@@ -73,7 +73,7 @@ describe('route guards', () => {
 
   it('TeacherRoute allows admin as elevated access', () => {
     mockedUseAuth.mockReturnValue(makeAuthValue({
-      user: { id: 'u2' },
+      user: { id: 'u2', email: 'u2@example.com' },
       role: 'admin',
       loading: false,
       resolveDashboardPath: () => '/admin-dashboard',
@@ -93,7 +93,7 @@ describe('route guards', () => {
 
   it('TeacherRoute redirects student to own dashboard', () => {
     mockedUseAuth.mockReturnValue(makeAuthValue({
-      user: { id: 'u3' },
+      user: { id: 'u3', email: 'u3@example.com' },
       role: 'student',
       loading: false,
       resolveDashboardPath: () => '/student-dashboard',

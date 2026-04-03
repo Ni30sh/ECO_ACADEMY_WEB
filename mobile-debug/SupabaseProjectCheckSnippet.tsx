@@ -1,7 +1,5 @@
-// @ts-nocheck
 import { useEffect } from "react";
-import { Buffer } from "buffer";
-import { supabase } from "./supabaseClient";
+import { supabase } from "./supabaseClient.ts";
 
 const EXPECTED_REF = "vzwvnhgorvqnwluzxtkk";
 const CHECK_SUBMISSION_ID = "1a8e414c-0839-4401-8ca9-ffdeb8e0323a";
@@ -12,29 +10,54 @@ function extractRefFromUrl(url?: string | null) {
   return m?.[1] ?? null;
 }
 
-function decodeJwtPayload(token?: string | null): any {
+type JwtPayload = {
+  ref?: string;
+  [key: string]: unknown;
+};
+
+type MissionSubmissionPreview = {
+  id: string;
+  status: string | null;
+  submitted_at: string | null;
+  reviewed_at: string | null;
+  user_id: string | null;
+  mission_id: string | null;
+  updated_at: string | null;
+};
+
+function decodeBase64Url(value: string): string {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), "=");
+  return atob(padded);
+}
+
+function decodeJwtPayload(token?: string | null): JwtPayload | null {
   if (!token) return null;
   try {
     const parts = token.split(".");
     if (parts.length < 2) return null;
-    const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const json = Buffer.from(payload, "base64").toString("utf8");
+    const json = decodeBase64Url(parts[1]);
     return JSON.parse(json);
   } catch {
     return null;
   }
 }
 
+function getEnvValue(key: string): string | null {
+  const processEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
+  return processEnv?.[key] ?? null;
+}
+
 export async function debugMobileSupabaseTarget() {
   try {
     const supabaseUrl =
-      (process.env.EXPO_PUBLIC_SUPABASE_URL as string) ||
-      (process.env.SUPABASE_URL as string) ||
+      getEnvValue("EXPO_PUBLIC_SUPABASE_URL") ||
+      getEnvValue("SUPABASE_URL") ||
       null;
 
     const anonKey =
-      (process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY as string) ||
-      (process.env.SUPABASE_ANON_KEY as string) ||
+      getEnvValue("EXPO_PUBLIC_SUPABASE_ANON_KEY") ||
+      getEnvValue("SUPABASE_ANON_KEY") ||
       null;
 
     const urlRef = extractRefFromUrl(supabaseUrl);
@@ -105,9 +128,9 @@ export async function debugMobileSupabaseTarget() {
     } else {
       console.log(
         "[mobile-db] Submissions accessible to this session (first 5):",
-        allMySubs?.map((s) => ({ id: s.id, user_id: s.user_id, status: s.status }))
+        allMySubs?.map((s: MissionSubmissionPreview) => ({ id: s.id, user_id: s.user_id, status: s.status }))
       );
-      const targetSubmissionInList = allMySubs?.some((s) => s.id === CHECK_SUBMISSION_ID);
+      const targetSubmissionInList = allMySubs?.some((s: MissionSubmissionPreview) => s.id === CHECK_SUBMISSION_ID);
       console.log(
         "[mobile-db] Target submission",
         CHECK_SUBMISSION_ID,

@@ -112,7 +112,7 @@ export function useProfileData() {
     enabled: !!userId && !!profile,
   });
 
-  const submissionsQuery = (offset: number, limit: number, filter: 'all' | 'week' | 'month') => {
+  const submissionsQuery = async (offset: number, limit: number, filter: 'all' | 'week' | 'month') => {
     let gte: string | undefined;
     if (filter === 'week') {
       const d = new Date();
@@ -125,26 +125,20 @@ export function useProfileData() {
       gte = d.toISOString();
     }
 
-    return useQuery({
-      queryKey: ['profile-submissions', userId, offset, limit, filter],
-      queryFn: async () => {
-        if (!userId) return { data: [], count: 0 };
+    if (!userId) return { data: [], count: 0 };
 
-        let submissions = await supabaseQueries.missionSubmissions.getUserSubmissions(userId);
+    let submissions = await supabaseQueries.missionSubmissions.getUserSubmissions(userId);
 
-        if (gte) {
-          submissions = submissions.filter((s) => (s.submitted_at || '') >= gte!);
-        }
+    if (gte) {
+      submissions = submissions.filter((s) => (s.submitted_at || '') >= gte);
+    }
 
-        submissions = submissions.sort(
-          (a, b) => new Date(b.submitted_at || 0).getTime() - new Date(a.submitted_at || 0).getTime()
-        );
+    submissions = submissions.sort(
+      (a, b) => new Date(b.submitted_at || 0).getTime() - new Date(a.submitted_at || 0).getTime()
+    );
 
-        const paginated = submissions.slice(offset, offset + limit);
-        return { data: paginated, count: submissions.length };
-      },
-      enabled: !!userId,
-    });
+    const paginated = submissions.slice(offset, offset + limit);
+    return { data: paginated, count: submissions.length };
   };
 
   const updateProfile = useMutation({
