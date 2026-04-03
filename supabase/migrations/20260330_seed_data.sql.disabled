@@ -1,0 +1,339 @@
+-- Insert schools
+INSERT INTO schools (name, city, country, logo_url) VALUES
+('Green Valley Academy', 'Portland', 'USA', ''),
+('Sunrise International', 'Mumbai', 'India', ''),
+('Nordic Nature School', 'Oslo', 'Norway', ''),
+('Maharana Pratap', 'Udaipur', 'India', ''),
+('MPGI', 'Kanpur', 'India', ''),
+('PSIT', 'Kanpur', 'India', ''),
+('KGI', 'Kanpur', 'India', ''),
+('KIT', 'Kanpur', 'India', ''),
+('AKTU', 'Lucknow', 'India', ''),
+('CSJMU', 'Kanpur', 'India', '')
+ON CONFLICT DO NOTHING;
+
+-- Insert missions with steps included
+INSERT INTO missions (title, description, category, difficulty, eco_points_reward, xp_reward, requires_photo, requires_location, requires_teacher_approval, icon_url, steps, is_active) VALUES
+(
+  'Plant a Native Tree',
+  'Plant a tree native to your region in your school grounds or local park.',
+  'planting',
+  'medium',
+  100,
+  50,
+  TRUE,
+  TRUE,
+  TRUE,
+  '🌱',
+  ARRAY[
+    'Choose a native species appropriate for your region',
+    'Find a suitable spot with good sunlight and drainage',
+    'Dig a hole twice the size of the root ball',
+    'Plant the tree and backfill with soil',
+    'Water thoroughly and take a photo with your tree',
+    'Care for the tree for the next 30 days'
+  ],
+  TRUE
+),
+(
+  'Campus Waste Audit',
+  'Count and categorize waste bins around your campus. Document what types of waste are being generated.',
+  'waste',
+  'easy',
+  50,
+  25,
+  TRUE,
+  FALSE,
+  FALSE,
+  '♻️',
+  ARRAY[
+    'Walk around the entire campus systematically',
+    'Identify and count all waste bins',
+    'Categorize waste types (plastic, paper, glass, mixed)',
+    'Take photos of the waste distribution',
+    'Create a summary report of findings'
+  ],
+  TRUE
+),
+(
+  'Energy Patrol',
+  'Identify and turn off unused lights, electronics, and appliances in your school.',
+  'energy',
+  'easy',
+  50,
+  25,
+  TRUE,
+  FALSE,
+  FALSE,
+  '⚡',
+  ARRAY[
+    'Schedule your patrol during school hours',
+    'Check classrooms for unnecessary lights',
+    'Check offices for idle electronics',
+    'Document findings with photos',
+    'Report to administration and create an action plan'
+  ],
+  TRUE
+),
+(
+  'Water Conservation Challenge',
+  'Monitor and reduce water usage at home for one week. Track daily water consumption.',
+  'water',
+  'hard',
+  200,
+  100,
+  FALSE,
+  FALSE,
+  TRUE,
+  '💧',
+  ARRAY[
+    'Read your home water meter on day 1',
+    'Implement water-saving practices daily',
+    'Take shorter showers (5 minutes or less)',
+    'Fix any leaky taps',
+    'Read water meter again on day 7 and compare usage'
+  ],
+  TRUE
+),
+(
+  'Bike to School Week',
+  'Cycle or walk to school for 5 consecutive days instead of using motorized transport.',
+  'transport',
+  'hard',
+  200,
+  100,
+  TRUE,
+  TRUE,
+  FALSE,
+  '🚲',
+  ARRAY[
+    'Plan your biking or walking route',
+    'Check bike safety (brakes, tires)',
+    'Bike or walk to school on day 1',
+    'Document with a photo each day',
+    'Complete all 5 days and submit proof'
+  ],
+  TRUE
+),
+(
+  'Butterfly Garden',
+  'Create a small butterfly-friendly garden with native flowering plants.',
+  'biodiversity',
+  'medium',
+  100,
+  50,
+  TRUE,
+  TRUE,
+  TRUE,
+  '🦋',
+  ARRAY[
+    'Research butterfly-friendly flowering plants',
+    'Prepare a suitable garden area',
+    'Plant native flowering plants',
+    'Set up a shallow water source',
+    'Document the completed garden',
+    'Monitor for butterfly visitors'
+  ],
+  TRUE
+),
+(
+  'Composting Station',
+  'Set up a composting station at school or home for organic waste.',
+  'waste',
+  'medium',
+  100,
+  50,
+  TRUE,
+  FALSE,
+  TRUE,
+  '🪱',
+  ARRAY[
+    'Gather materials for composting bin',
+    'Construct or assemble the composting station',
+    'Add initial brown and green materials',
+    'Document the setup with photos',
+    'Create maintenance schedule',
+    'Monitor and maintain for 4 weeks'
+  ],
+  TRUE
+),
+(
+  'Solar Energy Report',
+  'Research and present findings on how your school could benefit from solar panels.',
+  'energy',
+  'hard',
+  200,
+  100,
+  FALSE,
+  FALSE,
+  TRUE,
+  '☀️',
+  ARRAY[
+    'Research solar panel benefits and costs',
+    'Analyze your school''s roof for solar potential',
+    'Calculate potential energy savings',
+    'Research government incentives',
+    'Create a presentation',
+    'Present findings to school administration'
+  ],
+  TRUE
+),
+(
+  'Rain Water Harvesting',
+  'Design a simple rainwater collection system for school garden use.',
+  'water',
+  'medium',
+  100,
+  50,
+  TRUE,
+  TRUE,
+  TRUE,
+  '🌧️',
+  ARRAY[
+    'Design a rainwater collection system',
+    'Gather required materials and containers',
+    'Install gutters and collection tanks',
+    'Set up filters for collected water',
+    'Test the system in rain',
+    'Document the working system'
+  ],
+  TRUE
+),
+(
+  'Campus Tree Census',
+  'Identify and catalog all tree species on your school campus.',
+  'biodiversity',
+  'easy',
+  50,
+  25,
+  TRUE,
+  FALSE,
+  FALSE,
+  '🌳',
+  ARRAY[
+    'Walk the entire campus systematically',
+    'Identify each tree species',
+    'Record species names and quantities',
+    'Note tree locations on a map',
+    'Take photos of notable trees',
+    'Create a campus tree catalog'
+  ],
+  TRUE
+)
+ON CONFLICT DO NOTHING;
+
+-- Insert lessons
+INSERT INTO lessons (title, topic, content_type, content_json, eco_points_reward, estimated_minutes, order_index) VALUES
+(
+  'What is Climate Change?',
+  'climate_change',
+  'article',
+  '{
+    "body": "Climate change refers to long-term shifts in global temperatures and weather patterns. While climate shifts can be natural, since the 1800s, human activities have been the main driver — primarily due to burning fossil fuels like coal, oil, and gas.",
+    "summary": "Understanding the basics of climate change and its causes."
+  }'::jsonb,
+  20,
+  10,
+  1
+),
+(
+  'Climate Change Quiz',
+  'climate_change',
+  'quiz',
+  '{
+    "questions": [
+      {
+        "question": "What is the main greenhouse gas produced by human activity?",
+        "options": ["Oxygen", "Carbon Dioxide", "Nitrogen", "Helium"],
+        "correct_index": 1,
+        "explanation": "CO₂ from burning fossil fuels is the primary greenhouse gas driving climate change."
+      },
+      {
+        "question": "What global agreement aims to limit warming to 1.5°C?",
+        "options": ["Kyoto Protocol", "Montreal Protocol", "Paris Agreement", "Geneva Convention"],
+        "correct_index": 2,
+        "explanation": "The Paris Agreement (2015) set the goal of limiting global warming to 1.5°C above pre-industrial levels."
+      }
+    ]
+  }'::jsonb,
+  30,
+  5,
+  2
+),
+(
+  'Understanding Pollution',
+  'pollution',
+  'article',
+  '{
+    "body": "Pollution is the introduction of harmful materials into the environment. These harmful materials are called pollutants. They can be natural or created by human activity.",
+    "summary": "Types and impacts of environmental pollution."
+  }'::jsonb,
+  20,
+  8,
+  1
+),
+(
+  'Waste Reduction Strategies',
+  'waste',
+  'article',
+  '{
+    "body": "The waste hierarchy — Reduce, Reuse, Recycle — provides a guide for minimizing waste. Reducing consumption is the most effective strategy.",
+    "summary": "Learn the waste hierarchy and practical reduction tips."
+  }'::jsonb,
+  20,
+  8,
+  1
+),
+(
+  'Renewable Energy Sources',
+  'energy',
+  'article',
+  '{
+    "body": "Renewable energy comes from sources that are naturally replenished: solar, wind, hydro, geothermal, and biomass. These sources produce little to no greenhouse gas emissions.",
+    "summary": "Overview of renewable energy sources and their benefits."
+  }'::jsonb,
+  20,
+  10,
+  1
+),
+(
+  'Water Conservation Basics',
+  'water',
+  'article',
+  '{
+    "body": "Water is a precious resource. About 2.2 billion people worldwide lack safe drinking water. By conserving water, you help ensure this resource is available for future generations.",
+    "summary": "Learn why water conservation matters and how to practice it daily."
+  }'::jsonb,
+  20,
+  7,
+  1
+),
+(
+  'Biodiversity and Ecosystems',
+  'biodiversity',
+  'article',
+  '{
+    "body": "Biodiversity refers to the variety of plant and animal life in a particular habitat or ecosystem. High biodiversity indicates a healthy ecosystem.",
+    "summary": "Understanding the importance of biodiversity for ecosystem health."
+  }'::jsonb,
+  20,
+  9,
+  1
+)
+ON CONFLICT DO NOTHING;
+
+-- Insert badges
+INSERT INTO badges (name, description, icon, trigger_type, trigger_count, trigger_category) VALUES
+('First Steps', 'Complete your first mission', '🌱', 'missions_completed', 1, NULL),
+('On Fire', '7-day streak', '🔥', 'streak', 7, NULL),
+('Water Guardian', 'Complete 5 water missions', '💧', 'category_missions', 5, 'water'),
+('Recycling Hero', 'Complete 5 waste missions', '♻️', 'category_missions', 5, 'waste'),
+('Tree Hugger', 'Plant 3 trees', '🌳', 'trees_planted', 3, NULL),
+('Eco Scholar', 'Complete 10 lessons', '📚', 'lessons_completed', 10, NULL),
+('Top 10', 'Reach top 10 on leaderboard', '🏆', 'leaderboard_rank', 10, NULL),
+('Globe Trotter', 'Complete missions in 3 categories', '🌍', 'categories_completed', 3, NULL),
+('Quick Learner', 'Get 100% on a quiz', '⚡', 'perfect_quiz', 1, NULL),
+('Team Player', 'Participate in a school challenge', '🤝', 'challenge_participated', 1, NULL),
+('Early Bird', 'Complete a mission before 8 AM', '🌅', 'early_mission', 1, NULL),
+('Night Owl', 'Study eco lessons after 9 PM', '🦉', 'night_lesson', 1, NULL)
+ON CONFLICT DO NOTHING;
