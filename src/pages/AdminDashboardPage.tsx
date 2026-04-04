@@ -556,6 +556,12 @@ export default function AdminDashboardPage() {
       .slice(0, 25);
   }, [submissions]);
 
+  const teacherSchoolRows = useMemo(() => {
+    return users
+      .filter((u) => u.role === 'teacher')
+      .sort((a, b) => a.full_name.localeCompare(b.full_name));
+  }, [users]);
+
   const resetAdminFilters = () => {
     setGlobalSearch('');
     setRoleFilter('all');
@@ -1106,6 +1112,30 @@ export default function AdminDashboardPage() {
             </Card>
 
             <div className="space-y-4">
+              <Card className={`rounded-xl border shadow-sm transition-colors duration-300 ${themeStyles.panelBg}`}>
+                <CardHeader>
+                  <CardTitle className={`flex items-center gap-2 text-xl ${themeStyles.textPrimary}`}>
+                    <UserCheck className="h-4 w-4" /> Teachers By School
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {teacherSchoolRows.length === 0 && (
+                    <p className={`text-sm ${themeStyles.textSecondary}`}>No teachers found.</p>
+                  )}
+                  {teacherSchoolRows.map((teacher) => (
+                    <div
+                      key={teacher.id}
+                      className={`flex items-center justify-between rounded-xl border px-3 py-2 transition-colors duration-300 ${
+                        theme === 'dark' ? 'border-slate-700 bg-slate-700/30' : 'border-gray-200 bg-gray-50'
+                      }`}
+                    >
+                      <span className={`text-sm font-medium ${themeStyles.textPrimary}`}>{teacher.full_name}</span>
+                      <span className={`text-xs ${themeStyles.textSecondary}`}>{teacher.school_name || '-'}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
               <Card className={`rounded-xl border shadow-sm transition-colors duration-300 ${themeStyles.panelBg}`}>
                 <CardHeader>
                   <CardTitle className={`flex items-center gap-2 text-xl ${themeStyles.textPrimary}`}>

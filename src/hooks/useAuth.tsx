@@ -260,6 +260,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const nextUser = toAuthUser(nextSession.user);
     setUser(nextUser);
     setSession(toAuthSession(nextSession));
+    setProfile(null);
+    setRole(null);
 
     const fetchedProfile = await ensureProfileForSessionUser(nextSession.user);
     const fallbackProfile = buildFallbackProfile(nextUser);
@@ -309,8 +311,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (!mounted) return;
-      setLoading(false);
-      void applySession(nextSession);
+      setLoading(true);
+      void (async () => {
+        try {
+          await applySession(nextSession);
+        } finally {
+          if (mounted) setLoading(false);
+        }
+      })();
     });
 
     return () => {

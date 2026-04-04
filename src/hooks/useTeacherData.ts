@@ -66,6 +66,11 @@ export function useTeacherData() {
     return typeof joined === 'string' ? joined.trim() : '';
   };
 
+  const isSameSchool = (row: any): boolean => {
+    if (!schoolName) return false;
+    return resolveProfileSchoolName(row).toLowerCase() === schoolName.toLowerCase();
+  };
+
   const toErrorMessage = (error: unknown) => {
     if (error instanceof Error) return error.message;
     if (typeof error === 'string') return error;
@@ -101,14 +106,9 @@ export function useTeacherData() {
     queryFn: async () => {
       if (!schoolName) return [];
       const rows = await supabaseQueries.profiles.getByRole('student');
-      const scopedRows = rows
+      return rows
         .filter((p) => (p.school_name || '').trim().toLowerCase() === schoolName.toLowerCase())
         .sort((a, b) => (b.eco_points || 0) - (a.eco_points || 0));
-
-      // Fallback: if school linkage is missing/mismatched, keep teacher view usable.
-      if (scopedRows.length > 0) return scopedRows;
-
-      return rows.sort((a, b) => (b.eco_points || 0) - (a.eco_points || 0));
     },
     enabled: !!userId && !!schoolName,
     staleTime: 5000,
@@ -119,8 +119,10 @@ export function useTeacherData() {
   const studentIdsKey = useMemo(() => studentIds.join(','), [studentIds]);
 
   const submissionsQuery = useQuery({
-    queryKey: ['teacher-submissions', schoolName],
+    queryKey: ['teacher-submissions', schoolName, studentIdsKey],
     queryFn: async () => {
+      if (!schoolName) return [];
+
       console.log(`[teacher-sync ${ts()}] polling submissions start`, {
         userId,
         schoolName,
@@ -132,7 +134,9 @@ export function useTeacherData() {
         .order('submitted_at', { ascending: false });
 
       if (error) throw error;
-      const sorted = [...(data || [])].sort((a: any, b: any) => getSubmissionOrderTs(b) - getSubmissionOrderTs(a));
+      const allowedStudentIds = new Set(studentIds);
+      const scoped = (data || []).filter((row: any) => allowedStudentIds.has(row.user_id));
+      const sorted = [...scoped].sort((a: any, b: any) => getSubmissionOrderTs(b) - getSubmissionOrderTs(a));
       console.log(`[teacher-sync ${ts()}] polling submissions done`, {
         count: sorted.length,
         statusCounts: sorted.reduce((acc: Record<string, number>, row: any) => {
@@ -143,7 +147,7 @@ export function useTeacherData() {
       });
       return sorted;
     },
-    enabled: !!userId,
+    enabled: !!userId && !!schoolName,
     staleTime: 5000,
     refetchInterval: 8000,
     refetchIntervalInBackground: true,
@@ -333,7 +337,7 @@ export function useTeacherData() {
 
       const targetStudent = await supabaseQueries.profiles.getById(studentId);
       if (!targetStudent) throw new Error('Student not found');
-      if (schoolName && resolveProfileSchoolName(targetStudent) !== schoolName) {
+      if (!isSameSchool(targetStudent)) {
         throw new Error('Student is outside your school scope');
       }
 
@@ -442,7 +446,7 @@ export function useTeacherData() {
 
       const targetStudent = await supabaseQueries.profiles.getById(studentId);
       if (!targetStudent) throw new Error('Student not found');
-      if (schoolName && resolveProfileSchoolName(targetStudent) !== schoolName) {
+      if (!isSameSchool(targetStudent)) {
         throw new Error('Student is outside your school scope');
       }
 
@@ -509,7 +513,7 @@ export function useTeacherData() {
       try {
         const student = await supabaseQueries.profiles.getById(studentId);
         if (!student) throw new Error('Student not found');
-        if (schoolName && resolveProfileSchoolName(student) !== schoolName) {
+        if (!isSameSchool(student)) {
           throw new Error('Student is outside your school scope');
         }
 

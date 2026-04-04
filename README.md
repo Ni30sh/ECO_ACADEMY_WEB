@@ -98,6 +98,8 @@ Main routes in the app:
 
 Student-only dashboard routes are not part of this web app. Student activity is still supported through the mission and submission data model, backend notifications, and educator review flows.
 
+Student-side project repository: https://github.com/Ni30sh/ecoverse-student
+
 ## Project Structure
 
 - `src/pages` - page-level screens
