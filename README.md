@@ -8,6 +8,11 @@ The web app in this repository focuses on teacher and administrator workflows:
 - Administrators manage users, missions, submissions, analytics, and platform-level updates.
 - Student activity is supported through the EcoQuest workflow and backend notifications, with review and approval handled by educators.
 
+## Repository Links
+
+- Teacher/Admin web app (this repository): https://github.com/Ni30sh/ECO_ACADEMY_WEB
+- Student-side app: https://github.com/Ni30sh/ecoverse-student
+
 ## Features
 
 - Role-based authentication and route protection
@@ -100,8 +105,6 @@ Main routes in the app:
 
 Student-only dashboard routes are not part of this web app. Student activity is still supported through the mission and submission data model, backend notifications, and educator review flows.
 
-Student-side project repository: https://github.com/Ni30sh/ecoverse-student
-
 ## Project Structure
 
 - `src/pages` - page-level screens
@@ -117,6 +120,19 @@ Student-side project repository: https://github.com/Ni30sh/ecoverse-student
 - The app uses Supabase for authentication, role checks, database access, realtime notifications, and mission review updates.
 - Keep generated schema types in sync whenever the Supabase schema changes.
 - If a schema change is not reflected in the app, restart the dev server after applying the migration.
+
+## Shared Data Contract (Teacher Side <-> Student Side)
+
+Both apps use the same Supabase project and core tables. The teacher app writes moderation and content data, and the student app reads and reacts to it.
+
+- `public.profiles`: identity, role, school scope, points and learner metadata
+- `public.missions`: mission content created by teacher/admin users
+- `public.mission_submissions`: student proof submissions and review status
+- `public.notifications`: in-app alerts for review outcomes and platform events
+- `public.daily_points`: score/points timeline used by leaderboard and progress UI
+- `public.teacher_signin_events`: teacher sign-in audit log for monitoring and troubleshooting
+
+If one app changes schema assumptions without a migration, the other app can break. Keep schema, policies, and generated types synchronized across both repositories.
 
 ## Student Workflow
 
@@ -159,6 +175,22 @@ How they work together:
 
 In short, Supabase is the shared backend contract between teacher/admin web workflows and the student mobile/web experience.
 
+## Run Teacher And Student Repos Together
+
+Use this flow when you want to test end-to-end behavior locally.
+
+1. Start this teacher/admin web app with `npm run dev`.
+2. In the student repository, set the same Supabase project values in `.env`.
+3. Start the student app in its own terminal.
+4. Sign in as teacher in this app and as student in the student app.
+5. Create or edit a mission from teacher side.
+6. Verify the mission appears in the student app.
+7. Submit proof from student app.
+8. Review and approve/reject from teacher side.
+9. Verify status, feedback, notifications, and points are reflected in student app.
+
+Tip: test with separate accounts (one teacher, one student) to avoid role confusion during QA.
+
 ## Admin Workflow
 
 1. Sign in through the admin login flow.
@@ -183,6 +215,24 @@ supabase link --project-ref <your-project-ref>
 supabase db push
 ```
 
+After applying migrations that affect frontend data models:
+
+1. Regenerate types with `npm run supabase:types:gen`.
+2. Apply generated types with `npm run supabase:types:apply`.
+3. Restart both teacher and student dev servers.
+
+## Teacher Sign-In Audit Logging
+
+Teacher sign-ins can be stored in `public.teacher_signin_events` for audit/history.
+
+- Migration file: `supabase/migrations/20260404120000_create_teacher_signin_events_table.sql`
+- Stores: teacher id, sign-in time, provider, ip, user agent, optional device metadata
+- RLS model:
+	- Teacher can insert/select own sign-in events
+	- Admin can manage all sign-in events
+
+Recommended usage in app flow: after successful teacher login, insert one row into this table.
+
 ## Deployment
 
 Build the app first:
@@ -200,6 +250,7 @@ If you use Supabase migrations in production, apply them before shipping the new
 - If the app shows stale schema errors, restart the dev server after applying migrations.
 - If a notification or review column error appears, verify the migration has been applied to the linked Supabase project.
 - If authentication or role redirects fail, confirm the Supabase env values and that the user profile role exists in the database.
+- If teacher login works but sign-in history is missing, check whether the app inserts into `public.teacher_signin_events` after auth success and verify RLS role claims.
 
 ## Contributing
 
