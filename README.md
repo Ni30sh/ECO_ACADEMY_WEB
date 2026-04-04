@@ -228,8 +228,8 @@ Teacher sign-ins can be stored in `public.teacher_signin_events` for audit/histo
 - Migration file: `supabase/migrations/20260404120000_create_teacher_signin_events_table.sql`
 - Stores: teacher id, sign-in time, provider, ip, user agent, optional device metadata
 - RLS model:
-	- Teacher can insert/select own sign-in events
-	- Admin can manage all sign-in events
+  - Teacher can insert/select own sign-in events
+  - Admin can manage all sign-in events
 
 Recommended usage in app flow: after successful teacher login, insert one row into this table.
 
