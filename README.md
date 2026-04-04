@@ -139,6 +139,24 @@ This is the student journey supported by the EcoQuest data model and notificatio
 5. Award bonus points when needed.
 6. Monitor the class leaderboard and mission activity.
 
+## Teacher-Side To Student-Side Flow
+
+This web app is the teacher and admin control surface, while the student app is available at:
+https://github.com/Ni30sh/ecoverse-student
+
+How they work together:
+
+1. Teachers create or update missions in this web app.
+2. The mission data is stored in Supabase and becomes visible in the student app mission list.
+3. Students open the student app, complete tasks, and submit proof.
+4. Submissions are written to the shared Supabase tables and enter pending review.
+5. Teachers review those submissions in this web app and approve or reject.
+6. Approval updates status, points, and notifications that the student app reads.
+7. Rejection stores feedback, and students see that feedback in the student app before resubmitting.
+8. Admin actions in this web app (role changes, policy actions, moderation) affect what students and teachers can access across both apps.
+
+In short, Supabase is the shared backend contract between teacher/admin web workflows and the student mobile/web experience.
+
 ## Admin Workflow
 
 1. Sign in through the admin login flow.
