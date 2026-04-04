@@ -57,6 +57,8 @@ VITE_SUPABASE_PROJECT_ID="your_supabase_project_id"
 VITE_SUPABASE_PUBLISHABLE_KEY="your_supabase_publishable_key"
 VITE_SUPABASE_URL="https://your-project-ref.supabase.co"
 VITE_SUPABASE_ANON_KEY="your_supabase_anon_key"
+OPENAI_API_KEY="your_openai_api_key"
+ - for ai generated quiz
 ```
 
 ### Run Locally
