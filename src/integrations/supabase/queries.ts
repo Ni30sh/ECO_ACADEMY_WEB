@@ -56,7 +56,7 @@ export const supabaseQueries = {
   // PROFILES (Users)
   // ============================================================================
   
-  profiles: {
+      profiles: {
     async getById(userId: string) {
       const { data, error } = await supabase
         .from('profiles')

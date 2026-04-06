@@ -128,9 +128,11 @@ export function useTeacherData() {
         schoolName,
       });
 
+      // Only fetch submissions with status 'submitted' or 'for_review'
       const { data, error } = await supabase
         .from('mission_submissions')
         .select('*, missions(*)')
+        .in('status', ['submitted', 'for_review'])
         .order('submitted_at', { ascending: false });
 
       if (error) throw error;

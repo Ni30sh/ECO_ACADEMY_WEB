@@ -542,7 +542,7 @@ export type Database = {
           id: string
           interests: string[] | null
           last_active_date: string | null
-          role: string | null
+          role: string
           school_id: string | null
           streak_days: number | null
           updated_at: string | null
@@ -557,7 +557,7 @@ export type Database = {
           id: string
           interests?: string[] | null
           last_active_date?: string | null
-          role?: string | null
+          role?: string
           school_id?: string | null
           streak_days?: number | null
           updated_at?: string | null
@@ -572,7 +572,7 @@ export type Database = {
           id?: string
           interests?: string[] | null
           last_active_date?: string | null
-          role?: string | null
+          role?: string
           school_id?: string | null
           streak_days?: number | null
           updated_at?: string | null
